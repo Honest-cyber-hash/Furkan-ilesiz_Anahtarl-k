@@ -3,688 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Atatürk AR Sergisi — Küçükçekmece</title>
-    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+    <title>Atatürk AR Sergisi — Küçükçekmece Gençlik Merkezi</title>
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/c-frame/aframe-extras@7.0.0/dist/aframe-extras.min.js"></script>
 
     <style>
+        /* Claude'un Arayüz Tasarımı */
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Montserrat:wght@200;400;500&display=swap');
 
-        :root {
-            --gold:      #b8973a;
-            --gold-dim:  #b8973a55;
-            --gold-glow: #b8973a18;
-            --ink:       #06070a;
-            --paper:     #f2ede4;
-            --mist:      #9fa3aa;
-        }
-
+        :root { --gold: #b8973a; --ink: #06070a; --paper: #f2ede4; --mist: #9fa3aa; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; height: 100%; overflow: hidden; background: var(--ink); color: var(--paper); font-family: 'Montserrat', sans-serif; }
 
-        html, body {
-            width: 100%; height: 100%;
-            overflow: hidden;
-            background: var(--ink);
-            color: var(--paper);
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        /* ═══════════════════════════════
-           SPLASH
-        ═══════════════════════════════ */
+        /* Başlangıç (Splash) Ekranı */
         #splash {
-            position: fixed;
-            inset: 0;
-            z-index: 9000;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: var(--ink);
+            position: fixed; inset: 0; z-index: 9000; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; background: var(--ink);
             transition: opacity 1s ease, visibility 1s ease;
         }
-
         #splash.out { opacity: 0; visibility: hidden; }
-
-        #splash::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse at center, transparent 30%, rgba(6,7,10,0.9) 100%);
-            pointer-events: none;
-        }
-
-        .splash-inner {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .rule {
-            width: 1px; height: 0;
-            background: linear-gradient(to bottom, transparent, var(--gold));
-            animation: ruleDown 1.4s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;
-        }
-        .rule.flip {
-            background: linear-gradient(to top, transparent, var(--gold));
-            animation: ruleDown 1.4s cubic-bezier(0.16,1,0.3,1) 0.4s forwards;
-            margin-top: 24px;
-        }
-        @keyframes ruleDown { to { height: 64px; } }
-
-        .splash-tag {
-            margin: 18px 0 12px;
-            font-size: 8px;
-            letter-spacing: 5px;
-            color: var(--gold);
-            text-transform: uppercase;
-            opacity: 0;
-            animation: fadeUp 0.9s ease 0.8s forwards;
-        }
-
-        .splash-name {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: clamp(50px, 13vw, 90px);
-            font-weight: 600;
-            line-height: 0.9;
-            text-align: center;
-            color: var(--paper);
-            opacity: 0;
-            animation: fadeUp 1s ease 1s forwards;
-        }
-
-        .splash-name em {
-            display: block;
-            font-style: italic;
-            font-weight: 300;
-            color: var(--gold);
-            font-size: 0.58em;
-            letter-spacing: 8px;
-            margin-top: 8px;
-        }
-
-        .splash-dates {
-            margin: 16px 0 30px;
-            font-size: 9px;
-            letter-spacing: 5px;
-            color: var(--mist);
-            opacity: 0;
-            animation: fadeUp 0.9s ease 1.2s forwards;
-        }
-
-        /* İki buton yan yana */
-        .splash-btns {
-            display: flex;
-            gap: 12px;
-            opacity: 0;
-            animation: fadeUp 0.9s ease 1.4s forwards;
-        }
-
+        
+        .splash-tag { font-size: 10px; letter-spacing: 4px; color: var(--gold); text-transform: uppercase; margin-bottom: 20px;}
+        .splash-name { font-family: 'Cormorant Garamond', serif; font-size: 60px; font-weight: 600; text-align: center; line-height: 1; }
+        .splash-name em { display: block; font-style: italic; font-weight: 300; color: var(--gold); font-size: 0.6em; letter-spacing: 5px; margin-top: 10px; }
+        
         .s-btn {
-            padding: 14px 36px;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 9px;
-            font-weight: 500;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            cursor: pointer;
-            border: 1px solid var(--gold);
-            background: transparent;
-            color: var(--gold);
-            position: relative;
-            overflow: hidden;
-            transition: color 0.35s;
+            margin-top: 40px; padding: 15px 40px; font-family: 'Montserrat', sans-serif; font-size: 12px; font-weight: 600;
+            letter-spacing: 2px; text-transform: uppercase; cursor: pointer; border: 1px solid var(--gold);
+            background: var(--gold); color: var(--ink); border-radius: 4px; transition: 0.3s;
         }
+        .s-btn:hover { background: transparent; color: var(--gold); }
 
-        .s-btn::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: var(--gold);
-            transform: translateX(-101%);
-            transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
-        }
+        .developer-note { margin-top: 25px; font-size: 10px; color: var(--mist); letter-spacing: 2px; }
 
-        .s-btn:hover::before, .s-btn.primary::before { transform: translateX(0); }
-        .s-btn:hover, .s-btn.primary { color: var(--ink); }
-        .s-btn span { position: relative; z-index: 1; }
-
-        /* primary = AR butonu dolu başlasın */
-        .s-btn.primary::before { transform: translateX(0); }
-
-        .s-btn.secondary {
-            border-color: var(--gold-dim);
-            color: var(--mist);
-        }
-        .s-btn.secondary::before { background: #1a1a1a; }
-        .s-btn.secondary:hover { color: var(--paper); }
-
-        .splash-note {
-            margin-top: 20px;
-            font-size: 9px;
-            letter-spacing: 2px;
-            color: #2e2e2e;
-            text-align: center;
-            line-height: 1.8;
-            opacity: 0;
-            animation: fadeUp 0.9s ease 1.6s forwards;
-        }
-
-        .splash-muni {
-            position: absolute;
-            bottom: 22px;
-            font-size: 8px;
-            letter-spacing: 3px;
-            color: #222;
-            text-transform: uppercase;
-            opacity: 0;
-            animation: fadeUp 0.8s ease 1.8s forwards;
-        }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(14px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
-        /* ═══════════════════════════════
-           3D VIEWER (sadece önizleme)
-        ═══════════════════════════════ */
-        #viewer-screen {
-            position: fixed;
-            inset: 0;
-            display: grid;
-            grid-template-rows: 52px 1fr 52px;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.8s ease, visibility 0.8s ease;
-        }
-
-        #viewer-screen.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* Header */
-        #vheader {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            background: rgba(6,7,10,0.92);
-            border-bottom: 1px solid var(--gold-dim);
-            backdrop-filter: blur(10px);
-            z-index: 10;
-        }
-
-        .vh-brand {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 15px;
-            font-weight: 600;
-            letter-spacing: 2px;
-            color: var(--paper);
-        }
-
-        .vh-badge {
-            font-size: 8px;
-            letter-spacing: 2px;
-            color: var(--gold);
-            border: 1px solid var(--gold-dim);
-            padding: 3px 10px;
-            text-transform: uppercase;
-        }
-
-        /* model-viewer */
-        #mv-wrap {
-            position: relative;
-            background: radial-gradient(ellipse at 50% 65%, #12100a, #06070a 70%);
-            overflow: hidden;
-        }
-
-        #mv-wrap::before {
-            content: '';
-            position: absolute;
-            bottom: 8%; left: 50%;
-            transform: translateX(-50%);
-            width: 55%; height: 35%;
-            background: radial-gradient(ellipse, var(--gold-glow), transparent 70%);
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        /* Tarama çizgisi */
-        #mv-wrap::after {
-            content: '';
-            position: absolute;
-            left: 0; right: 0; top: 0;
-            height: 1px;
-            background: linear-gradient(to right, transparent, var(--gold-dim), transparent);
-            animation: scanLine 7s linear infinite;
-            z-index: 2;
-            pointer-events: none;
-        }
-
-        @keyframes scanLine {
-            0%   { top: 0%;   opacity: 0.5; }
-            95%  { top: 100%; opacity: 0.2; }
-            100% { top: 100%; opacity: 0;   }
-        }
-
-        model-viewer {
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            --progress-bar-color: var(--gold);
-            --progress-mask: var(--ink);
-        }
-
-        /* model-viewer'ın kendi AR butonu tamamen gizli */
-        model-viewer::part(default-ar-button) { display: none !important; }
-
-        /* Köşe süsleri */
-        .cdeco {
-            position: absolute;
-            width: 22px; height: 22px;
-            border-color: var(--gold-dim);
-            border-style: solid;
-            z-index: 3;
-            pointer-events: none;
-        }
-        .cdeco.tl { top:14px;   left:14px;  border-width:1px 0 0 1px; }
-        .cdeco.tr { top:14px;   right:14px; border-width:1px 1px 0 0; }
-        .cdeco.bl { bottom:14px;left:14px;  border-width:0 0 1px 1px; }
-        .cdeco.br { bottom:14px;right:14px; border-width:0 1px 1px 0; }
-
-        /* Yükleme */
-        #ml {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            z-index: 5;
-            pointer-events: none;
-            transition: opacity 0.8s ease;
-        }
-        #ml.done { opacity: 0; }
-
-        .ml-text {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 22px;
-            font-style: italic;
-            color: var(--gold);
-            letter-spacing: 4px;
-        }
-        .ml-track { width: 110px; height: 1px; background: #1a1a1a; }
-        .ml-fill  { height: 100%; width: 0%; background: var(--gold); transition: width 0.25s; }
-        .ml-pct   { font-size: 8px; letter-spacing: 3px; color: #333; }
-
-        /* İpucu */
-        #hint3d {
-            position: absolute;
-            bottom: 12px; left: 50%;
-            transform: translateX(-50%);
-            font-size: 8px;
-            letter-spacing: 2.5px;
-            color: #252525;
-            text-transform: uppercase;
-            white-space: nowrap;
-            z-index: 4;
-            pointer-events: none;
-            animation: breath 3s ease-in-out infinite;
-        }
-        @keyframes breath {
-            0%,100% { opacity: 0.4; }
-            50%      { opacity: 0.9; }
-        }
-
-        /* Footer */
-        #vfooter {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            background: rgba(6,7,10,0.92);
-            border-top: 1px solid var(--gold-dim);
-            backdrop-filter: blur(10px);
-            z-index: 10;
-            gap: 10px;
-        }
-
-        .f-btn {
-            background: transparent;
-            border: 1px solid #1e1e1e;
-            color: var(--mist);
-            font-family: 'Montserrat', sans-serif;
-            font-size: 8px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            padding: 7px 14px;
-            cursor: pointer;
-            transition: all 0.25s;
-            white-space: nowrap;
-        }
-        .f-btn:hover, .f-btn.on {
-            border-color: var(--gold-dim);
-            color: var(--gold);
-        }
-
-        /* Büyük AR başlat butonu */
-        #big-ar-btn {
-            flex: 1;
-            max-width: 220px;
-            padding: 10px 0;
-            background: var(--gold);
-            border: none;
-            color: var(--ink);
-            font-family: 'Montserrat', sans-serif;
-            font-size: 9px;
-            font-weight: 600;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: opacity 0.3s;
-        }
-        #big-ar-btn:hover { opacity: 0.85; }
-        #big-ar-btn:disabled { opacity: 0.25; cursor: not-allowed; }
-
-        .f-copy {
-            font-size: 7px;
-            letter-spacing: 1px;
-            color: #1f1f1f;
-            white-space: nowrap;
-        }
-
-        /* ═══════════════════════════════
-           AR AÇIKLAMASI (cihaz uyumsuzsa)
-        ═══════════════════════════════ */
-        #ar-tip {
-            position: fixed;
-            inset: 0;
-            z-index: 8000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            background: rgba(6,7,10,0.95);
-            padding: 30px;
-        }
-        #ar-tip.show { display: flex; }
-
-        .tip-box {
-            border: 1px solid var(--gold-dim);
-            padding: 36px 28px;
-            max-width: 320px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-        .tip-box h3 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 22px;
-            color: var(--gold);
-        }
-        .tip-box p {
-            font-size: 11px;
-            color: var(--mist);
-            line-height: 1.8;
-            letter-spacing: 0.5px;
-        }
-        .tip-box ul {
-            list-style: none;
-            text-align: left;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .tip-box ul li {
-            font-size: 11px;
-            color: #888;
-            padding-left: 14px;
-            position: relative;
-        }
-        .tip-box ul li::before {
-            content: '—';
-            position: absolute;
-            left: 0;
-            color: var(--gold-dim);
-        }
-        .tip-close {
-            padding: 10px;
-            background: transparent;
-            border: 1px solid var(--gold-dim);
-            color: var(--gold);
-            font-family: 'Montserrat', sans-serif;
-            font-size: 9px;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            cursor: pointer;
-        }
-        .tip-close:hover { background: var(--gold-glow); }
+        /* A-Frame'in sağ alttaki kendi VR butonunu gizliyoruz */
+        .a-enter-vr { display: none !important; }
     </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════
-     SPLASH
-═══════════════════════════════════════ -->
-<div id="splash">
-    <div class="splash-inner">
-        <div class="rule"></div>
-        <div class="splash-tag">Küçükçekmece Belediyesi · AR Sergi</div>
-
-        <h1 class="splash-name">
-            Atatürk
-            <em>Yaşıyor</em>
-        </h1>
-
-        <div class="splash-dates">1881 &nbsp;—&nbsp; 1938</div>
-
-        <div class="splash-btns">
-            <!-- 📱 AR: kamera açılır, model gerçek dünyada durur -->
-            <button class="s-btn primary" id="btn-ar-splash">
-                <span>📱 AR ile Başlat</span>
-            </button>
-            <!-- 3D: kamerasız önizleme -->
-            <button class="s-btn secondary" id="btn-3d-splash">
-                <span>3D Önizle</span>
-            </button>
-        </div>
-
-        <div class="splash-note">
-            AR ile Başlat → Kamera açılır, model gerçek dünyada görünür<br>
-            3D Önizle → Kamerasız dönen 3D model
-        </div>
-
-        <div class="rule flip"></div>
-    </div>
-    <div class="splash-muni">© Küçükçekmece Belediyesi 2025</div>
-</div>
-
-<!-- ═══════════════════════════════════════
-     3D VIEWER EKRANI
-═══════════════════════════════════════ -->
-<div id="viewer-screen">
-
-    <header id="vheader">
-        <div class="vh-brand">Atatürk Sergisi</div>
-        <div class="vh-badge">Küçükçekmece</div>
-    </header>
-
-    <div id="mv-wrap">
-        <div class="cdeco tl"></div>
-        <div class="cdeco tr"></div>
-        <div class="cdeco bl"></div>
-        <div class="cdeco br"></div>
-
-        <!-- Yükleme -->
-        <div id="ml">
-            <div class="ml-text">Yükleniyor…</div>
-            <div class="ml-track"><div class="ml-fill" id="mlfill"></div></div>
-            <div class="ml-pct" id="mlpct">%0</div>
-        </div>
-
-        <div id="hint3d">Sürükle · Döndür · Yakınlaştır</div>
-
-        <!-- MODEL VIEWER -->
-        <model-viewer
-            id="mv"
-            src="ata_renkli_full8.glb"
-            camera-controls
-            touch-action="pan-y"
-            auto-rotate
-            auto-rotate-delay="600"
-            rotation-per-second="18deg"
-            camera-orbit="0deg 82deg 2.8m"
-            min-camera-orbit="auto auto 0.6m"
-            max-camera-orbit="auto auto 10m"
-            shadow-intensity="1.2"
-            shadow-softness="0.9"
-            exposure="1.05"
-            ar
-            ar-modes="webxr scene-viewer quick-look">
-        </model-viewer>
+    <div id="splash">
+        <div class="splash-tag">Küçükçekmece Gençlik Merkezi</div>
+        <h1 class="splash-name">Atatürk<em>Yaşıyor</em></h1>
+        <button class="s-btn" id="btn-ar-splash">📱 Kamerayı Aç ve Logoyu Okut</button>
+        <div class="developer-note">Geliştirici: esmanur çaça</div>
     </div>
 
-    <footer id="vfooter">
-        <button class="f-btn on" id="fbtn-rot">⟳ Döndür</button>
-        <button class="f-btn" id="fbtn-rst">↺ Sıfırla</button>
+    <a-scene mindar-image="imageTargetSrc: ./targets.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+        
+        <a-assets>
+            <a-asset-item id="ataturkModel" src="./ata_renkli_full8.glb"></a-asset-item>
+        </a-assets>
 
-        <!-- Bu buton model-viewer'ın AR'ını tetikler → kamera açılır -->
-        <button id="big-ar-btn">📱 KAMERAYI AÇ · AR</button>
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <div class="f-copy">© 2025</div>
-    </footer>
+        <a-entity mindar-image-target="targetIndex: 0">
+            <a-gltf-model rotation="0 0 0" position="0 0 0" scale="0.5 0.5 0.5" src="#ataturkModel" animation-mixer></a-gltf-model>
+        </a-entity>
 
-</div>
+    </a-scene>
 
-<!-- ═══════════════════════════════════════
-     AR UYUMSUZLUK AÇIKLAMASI
-═══════════════════════════════════════ -->
-<div id="ar-tip">
-    <div class="tip-box">
-        <h3>AR Desteklenmiyor</h3>
-        <p>Bu cihaz veya tarayıcı WebXR AR'ı desteklemiyor. Lütfen şunları deneyin:</p>
-        <ul>
-            <li>Android → Chrome tarayıcı</li>
-            <li>iOS (iPhone/iPad) → Safari tarayıcı</li>
-            <li>Sayfanın HTTPS üzerinden açıldığından emin olun</li>
-            <li>ARCore (Android) veya ARKit (iOS) kurulu olmalı</li>
-        </ul>
-        <button class="tip-close" id="tip-close">Tamam, 3D İzle</button>
-    </div>
-</div>
+    <script>
+        const splash = document.getElementById('splash');
+        const btnArSplash = document.getElementById('btn-ar-splash');
 
-<script>
-    const splash      = document.getElementById('splash');
-    const viewerScr   = document.getElementById('viewer-screen');
-    const mv          = document.getElementById('mv');
-    const mlfill      = document.getElementById('mlfill');
-    const mlpct       = document.getElementById('mlpct');
-    const mlWrap      = document.getElementById('ml');
-    const fbtnRot     = document.getElementById('fbtn-rot');
-    const fbtnRst     = document.getElementById('fbtn-rst');
-    const bigArBtn    = document.getElementById('big-ar-btn');
-    const arTip       = document.getElementById('ar-tip');
-    const tipClose    = document.getElementById('tip-close');
-    const btnArSplash = document.getElementById('btn-ar-splash');
-    const btn3dSplash = document.getElementById('btn-3d-splash');
-
-    function hideSplash() {
-        splash.classList.add('out');
-        setTimeout(() => splash.style.display = 'none', 1000);
-    }
-
-    function showViewer() {
-        viewerScr.classList.add('visible');
-    }
-
-    function tryActivateAR() {
-        // model-viewer yüklendikten sonra AR'ı dene
-        const activate = () => {
-            if (mv.canActivateAR) {
-                mv.activateAR();
-            } else {
-                // Desteklemiyorsa açıklama göster
-                arTip.classList.add('show');
-            }
-        };
-
-        if (mv.loaded) {
-            activate();
-        } else {
-            mv.addEventListener('load', activate, { once: true });
-        }
-    }
-
-    // ── Splash: AR butonu ──
-    btnArSplash.addEventListener('click', () => {
-        hideSplash();
-        showViewer();
-        // Model yüklenince otomatik AR başlat
-        setTimeout(tryActivateAR, 1200);
-    });
-
-    // ── Splash: 3D önizleme butonu ──
-    btn3dSplash.addEventListener('click', () => {
-        hideSplash();
-        showViewer();
-    });
-
-    // ── Footer: Kamerayı Aç (AR) butonu ──
-    bigArBtn.addEventListener('click', () => {
-        tryActivateAR();
-    });
-
-    // ── AR ipucu kapat ──
-    tipClose.addEventListener('click', () => {
-        arTip.classList.remove('show');
-    });
-
-    // ── Yükleme ilerlemesi ──
-    mv.addEventListener('progress', (e) => {
-        const pct = Math.round(e.detail.totalProgress * 100);
-        mlfill.style.width = pct + '%';
-        mlpct.textContent  = '%' + pct;
-    });
-
-    mv.addEventListener('load', () => {
-        mlWrap.classList.add('done');
-        setTimeout(() => mlWrap.style.display = 'none', 900);
-
-        // AR desteklenmiyorsa footer butonunu soluklaştır
-        if (!mv.canActivateAR) {
-            bigArBtn.title = 'Bu cihaz AR desteklemiyor';
-        }
-    });
-
-    // ── Döndür toggle ──
-    let rotating = true;
-    fbtnRot.addEventListener('click', () => {
-        rotating = !rotating;
-        mv.autoRotate = rotating;
-        fbtnRot.textContent = rotating ? '⟳ Döndür' : '⏸ Durdur';
-        fbtnRot.classList.toggle('on', rotating);
-    });
-
-    // ── Kamera sıfırla ──
-    fbtnRst.addEventListener('click', () => {
-        mv.cameraOrbit  = '0deg 82deg 2.8m';
-        mv.cameraTarget = 'auto auto auto';
-        mv.autoRotate   = true;
-        rotating = true;
-        fbtnRot.textContent = '⟳ Döndür';
-        fbtnRot.classList.add('on');
-    });
-
-    // ── AR oturumu bitince bilgi ver ──
-    mv.addEventListener('ar-status', (e) => {
-        if (e.detail.status === 'failed') {
-            arTip.classList.add('show');
-        }
-    });
-</script>
+        // Butona tıklanınca başlangıç ekranını kaydırarak gizle
+        btnArSplash.addEventListener('click', () => {
+            splash.classList.add('out');
+            setTimeout(() => splash.style.display = 'none', 1000);
+        });
+    </script>
 </body>
 </html>
