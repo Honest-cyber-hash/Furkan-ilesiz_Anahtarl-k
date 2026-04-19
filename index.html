@@ -3,20 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Atatürk 3D Sergisi — Küçükçekmece Belediyesi</title>
+    <title>Atatürk AR Sergisi — Küçükçekmece</title>
     <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Montserrat:wght@200;400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=Montserrat:wght@200;400;500&display=swap');
 
         :root {
-            --gold:     #b8973a;
-            --gold-dim: #b8973a44;
-            --gold-glow:#b8973a18;
-            --ink:      #06070a;
-            --paper:    #f2ede4;
-            --mist:     #9fa3aa;
-            --red:      #c0392b;
+            --gold:      #b8973a;
+            --gold-dim:  #b8973a55;
+            --gold-glow: #b8973a18;
+            --ink:       #06070a;
+            --paper:     #f2ede4;
+            --mist:      #9fa3aa;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -29,9 +28,9 @@
             font-family: 'Montserrat', sans-serif;
         }
 
-        /* ═══════════════════════════════════════
-           SPLASH / INTRO
-        ═══════════════════════════════════════ */
+        /* ═══════════════════════════════
+           SPLASH
+        ═══════════════════════════════ */
         #splash {
             position: fixed;
             inset: 0;
@@ -44,27 +43,13 @@
             transition: opacity 1s ease, visibility 1s ease;
         }
 
-        #splash.out {
-            opacity: 0;
-            visibility: hidden;
-        }
+        #splash.out { opacity: 0; visibility: hidden; }
 
-        /* Animated noise grain overlay */
         #splash::before {
             content: '';
             position: absolute;
             inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.06'/%3E%3C/svg%3E");
-            opacity: 0.4;
-            pointer-events: none;
-        }
-
-        /* Vignette */
-        #splash::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse at center, transparent 30%, rgba(6,7,10,0.85) 100%);
+            background: radial-gradient(ellipse at center, transparent 30%, rgba(6,7,10,0.9) 100%);
             pointer-events: none;
         }
 
@@ -74,46 +59,39 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0;
         }
 
-        /* Thin top rule */
         .rule {
-            width: 1px;
-            height: 0;
+            width: 1px; height: 0;
             background: linear-gradient(to bottom, transparent, var(--gold));
             animation: ruleDown 1.4s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;
         }
-
-        .rule.bottom {
+        .rule.flip {
             background: linear-gradient(to top, transparent, var(--gold));
             animation: ruleDown 1.4s cubic-bezier(0.16,1,0.3,1) 0.4s forwards;
+            margin-top: 24px;
         }
-
-        @keyframes ruleDown {
-            to { height: 72px; }
-        }
+        @keyframes ruleDown { to { height: 64px; } }
 
         .splash-tag {
-            margin: 20px 0 14px;
-            font-size: 8.5px;
+            margin: 18px 0 12px;
+            font-size: 8px;
             letter-spacing: 5px;
             color: var(--gold);
             text-transform: uppercase;
             opacity: 0;
-            animation: fadeSlide 0.9s ease 0.8s forwards;
+            animation: fadeUp 0.9s ease 0.8s forwards;
         }
 
         .splash-name {
             font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(50px, 13vw, 90px);
             font-weight: 600;
-            font-size: clamp(48px, 12vw, 88px);
-            letter-spacing: -1px;
-            line-height: 0.92;
+            line-height: 0.9;
             text-align: center;
             color: var(--paper);
             opacity: 0;
-            animation: fadeSlide 1s ease 1s forwards;
+            animation: fadeUp 1s ease 1s forwards;
         }
 
         .splash-name em {
@@ -121,133 +99,125 @@
             font-style: italic;
             font-weight: 300;
             color: var(--gold);
-            font-size: 0.62em;
-            letter-spacing: 6px;
-            margin-top: 6px;
+            font-size: 0.58em;
+            letter-spacing: 8px;
+            margin-top: 8px;
         }
 
         .splash-dates {
-            margin: 18px 0 32px;
-            font-size: 10px;
-            letter-spacing: 4px;
+            margin: 16px 0 30px;
+            font-size: 9px;
+            letter-spacing: 5px;
             color: var(--mist);
             opacity: 0;
-            animation: fadeSlide 0.9s ease 1.2s forwards;
+            animation: fadeUp 0.9s ease 1.2s forwards;
         }
 
-        .enter-btn {
-            position: relative;
-            padding: 15px 52px;
-            background: transparent;
-            border: 1px solid var(--gold);
-            color: var(--gold);
+        /* İki buton yan yana */
+        .splash-btns {
+            display: flex;
+            gap: 12px;
+            opacity: 0;
+            animation: fadeUp 0.9s ease 1.4s forwards;
+        }
+
+        .s-btn {
+            padding: 14px 36px;
             font-family: 'Montserrat', sans-serif;
             font-size: 9px;
             font-weight: 500;
-            letter-spacing: 4px;
+            letter-spacing: 3px;
             text-transform: uppercase;
             cursor: pointer;
+            border: 1px solid var(--gold);
+            background: transparent;
+            color: var(--gold);
+            position: relative;
             overflow: hidden;
-            transition: color 0.4s ease;
-            opacity: 0;
-            animation: fadeSlide 0.9s ease 1.5s forwards;
+            transition: color 0.35s;
         }
 
-        .enter-btn::before {
+        .s-btn::before {
             content: '';
             position: absolute;
             inset: 0;
             background: var(--gold);
             transform: translateX(-101%);
-            transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+            transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
         }
 
-        .enter-btn:hover::before { transform: translateX(0); }
-        .enter-btn:hover { color: var(--ink); }
+        .s-btn:hover::before, .s-btn.primary::before { transform: translateX(0); }
+        .s-btn:hover, .s-btn.primary { color: var(--ink); }
+        .s-btn span { position: relative; z-index: 1; }
 
-        .enter-btn span { position: relative; z-index: 1; }
+        /* primary = AR butonu dolu başlasın */
+        .s-btn.primary::before { transform: translateX(0); }
+
+        .s-btn.secondary {
+            border-color: var(--gold-dim);
+            color: var(--mist);
+        }
+        .s-btn.secondary::before { background: #1a1a1a; }
+        .s-btn.secondary:hover { color: var(--paper); }
+
+        .splash-note {
+            margin-top: 20px;
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: #2e2e2e;
+            text-align: center;
+            line-height: 1.8;
+            opacity: 0;
+            animation: fadeUp 0.9s ease 1.6s forwards;
+        }
 
         .splash-muni {
             position: absolute;
-            bottom: 24px;
+            bottom: 22px;
             font-size: 8px;
             letter-spacing: 3px;
-            color: #333;
+            color: #222;
             text-transform: uppercase;
             opacity: 0;
-            animation: fadeSlide 0.8s ease 1.8s forwards;
+            animation: fadeUp 0.8s ease 1.8s forwards;
         }
 
-        @keyframes fadeSlide {
-            from { opacity: 0; transform: translateY(12px); }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* ═══════════════════════════════════════
-           MAIN LAYOUT
-        ═══════════════════════════════════════ */
-        #app {
+        /* ═══════════════════════════════
+           3D VIEWER (sadece önizleme)
+        ═══════════════════════════════ */
+        #viewer-screen {
             position: fixed;
             inset: 0;
             display: grid;
-            grid-template-rows: auto 1fr auto;
+            grid-template-rows: 52px 1fr 52px;
             opacity: 0;
-            transition: opacity 0.8s ease;
-            pointer-events: none;
+            visibility: hidden;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
         }
 
-        #app.visible {
+        #viewer-screen.visible {
             opacity: 1;
-            pointer-events: all;
+            visibility: visible;
         }
 
-        /* ── Header ── */
-        #header {
+        /* Header */
+        #vheader {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 24px;
-            height: 56px;
+            padding: 0 20px;
             background: rgba(6,7,10,0.92);
             border-bottom: 1px solid var(--gold-dim);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(10px);
             z-index: 10;
         }
 
-        .h-brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .h-logo-k {
-            width: 28px; height: 28px;
-            position: relative;
-        }
-
-        /* Geometric K made from CSS */
-        .h-logo-k::before,
-        .h-logo-k::after {
-            content: '';
-            position: absolute;
-            background: var(--gold);
-        }
-        /* Vertical bar */
-        .h-logo-k::before {
-            left: 5px; top: 4px;
-            width: 3px; height: 20px;
-        }
-        /* Diagonal bars via clip-path */
-        .h-logo-k::after {
-            left: 8px; top: 4px;
-            width: 16px; height: 20px;
-            background: transparent;
-            border-top: 3px solid var(--gold);
-            border-bottom: 3px solid var(--gold);
-            clip-path: polygon(0 0, 100% 0, 50% 50%, 100% 100%, 0 100%, 50% 50%);
-        }
-
-        .h-title {
+        .vh-brand {
             font-family: 'Cormorant Garamond', serif;
             font-size: 15px;
             font-weight: 600;
@@ -255,66 +225,49 @@
             color: var(--paper);
         }
 
-        .h-sub {
-            font-size: 8px;
-            letter-spacing: 2px;
-            color: var(--mist);
-            text-transform: uppercase;
-        }
-
-        .h-right {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .h-badge {
+        .vh-badge {
             font-size: 8px;
             letter-spacing: 2px;
             color: var(--gold);
-            text-transform: uppercase;
             border: 1px solid var(--gold-dim);
-            padding: 4px 10px;
+            padding: 3px 10px;
+            text-transform: uppercase;
         }
 
-        /* ── model-viewer area ── */
-        #viewer-wrap {
+        /* model-viewer */
+        #mv-wrap {
             position: relative;
+            background: radial-gradient(ellipse at 50% 65%, #12100a, #06070a 70%);
             overflow: hidden;
-            background: radial-gradient(ellipse at 50% 60%, #12100a 0%, #06070a 70%);
         }
 
-        /* Radial glow behind model */
-        #viewer-wrap::before {
+        #mv-wrap::before {
             content: '';
             position: absolute;
-            bottom: 10%;
-            left: 50%;
+            bottom: 8%; left: 50%;
             transform: translateX(-50%);
-            width: 60%;
-            height: 40%;
-            background: radial-gradient(ellipse, var(--gold-glow) 0%, transparent 70%);
+            width: 55%; height: 35%;
+            background: radial-gradient(ellipse, var(--gold-glow), transparent 70%);
             pointer-events: none;
             z-index: 1;
         }
 
-        /* Horizontal scan line — decorative */
-        #viewer-wrap::after {
+        /* Tarama çizgisi */
+        #mv-wrap::after {
             content: '';
             position: absolute;
-            left: 0; right: 0;
-            top: 0;
+            left: 0; right: 0; top: 0;
             height: 1px;
             background: linear-gradient(to right, transparent, var(--gold-dim), transparent);
-            animation: scanLine 6s linear infinite;
+            animation: scanLine 7s linear infinite;
             z-index: 2;
             pointer-events: none;
         }
 
         @keyframes scanLine {
-            0%   { top: 0;    opacity: 0.6; }
-            90%  { top: 100%; opacity: 0.3; }
-            100% { top: 100%; opacity: 0; }
+            0%   { top: 0%;   opacity: 0.5; }
+            95%  { top: 100%; opacity: 0.2; }
+            100% { top: 100%; opacity: 0;   }
         }
 
         model-viewer {
@@ -325,57 +278,11 @@
             --progress-mask: var(--ink);
         }
 
-        /* Hide default AR button */
+        /* model-viewer'ın kendi AR butonu tamamen gizli */
         model-viewer::part(default-ar-button) { display: none !important; }
 
-        /* ── Loading state ── */
-        #model-loading {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            z-index: 5;
-            pointer-events: none;
-            transition: opacity 0.8s ease;
-        }
-
-        #model-loading.done { opacity: 0; }
-
-        .ml-name {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 28px;
-            font-weight: 300;
-            font-style: italic;
-            color: var(--gold);
-            letter-spacing: 4px;
-        }
-
-        .ml-track {
-            width: 120px;
-            height: 1px;
-            background: #1a1a1a;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .ml-fill {
-            height: 100%;
-            width: 0%;
-            background: var(--gold);
-            transition: width 0.25s ease;
-        }
-
-        .ml-pct {
-            font-size: 9px;
-            letter-spacing: 3px;
-            color: #333;
-        }
-
-        /* ── Corner decorations ── */
-        .corner-deco {
+        /* Köşe süsleri */
+        .cdeco {
             position: absolute;
             width: 22px; height: 22px;
             border-color: var(--gold-dim);
@@ -383,86 +290,70 @@
             z-index: 3;
             pointer-events: none;
         }
-        .corner-deco.tl { top: 16px; left: 16px;   border-width: 1px 0 0 1px; }
-        .corner-deco.tr { top: 16px; right: 16px;   border-width: 1px 1px 0 0; }
-        .corner-deco.bl { bottom: 16px; left: 16px; border-width: 0 0 1px 1px; }
-        .corner-deco.br { bottom: 16px; right: 16px;border-width: 0 1px 1px 0; }
+        .cdeco.tl { top:14px;   left:14px;  border-width:1px 0 0 1px; }
+        .cdeco.tr { top:14px;   right:14px; border-width:1px 1px 0 0; }
+        .cdeco.bl { bottom:14px;left:14px;  border-width:0 0 1px 1px; }
+        .cdeco.br { bottom:14px;right:14px; border-width:0 1px 1px 0; }
 
-        /* ── Info overlay (right side) ── */
-        #info-strip {
+        /* Yükleme */
+        #ml {
             position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
+            inset: 0;
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            z-index: 4;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            z-index: 5;
             pointer-events: none;
+            transition: opacity 0.8s ease;
         }
+        #ml.done { opacity: 0; }
 
-        .info-line {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 3px;
-        }
-
-        .info-label {
-            font-size: 7px;
-            letter-spacing: 3px;
-            color: var(--gold);
-            text-transform: uppercase;
-        }
-
-        .info-val {
+        .ml-text {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 14px;
-            color: var(--paper);
-            letter-spacing: 1px;
+            font-size: 22px;
+            font-style: italic;
+            color: var(--gold);
+            letter-spacing: 4px;
         }
+        .ml-track { width: 110px; height: 1px; background: #1a1a1a; }
+        .ml-fill  { height: 100%; width: 0%; background: var(--gold); transition: width 0.25s; }
+        .ml-pct   { font-size: 8px; letter-spacing: 3px; color: #333; }
 
-        /* ── Hint bottom center ── */
-        #hint {
+        /* İpucu */
+        #hint3d {
             position: absolute;
-            bottom: 14px;
-            left: 50%;
+            bottom: 12px; left: 50%;
             transform: translateX(-50%);
-            font-size: 9px;
+            font-size: 8px;
             letter-spacing: 2.5px;
-            color: #2a2a2a;
+            color: #252525;
             text-transform: uppercase;
             white-space: nowrap;
             z-index: 4;
             pointer-events: none;
-            animation: hintBreath 3s ease-in-out infinite;
+            animation: breath 3s ease-in-out infinite;
+        }
+        @keyframes breath {
+            0%,100% { opacity: 0.4; }
+            50%      { opacity: 0.9; }
         }
 
-        @keyframes hintBreath {
-            0%, 100% { opacity: 0.4; }
-            50%       { opacity: 0.9; }
-        }
-
-        /* ── Footer ── */
-        #footer {
+        /* Footer */
+        #vfooter {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 24px;
-            height: 52px;
+            padding: 0 20px;
             background: rgba(6,7,10,0.92);
             border-top: 1px solid var(--gold-dim);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(10px);
             z-index: 10;
+            gap: 10px;
         }
 
-        .f-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .ctrl-btn {
+        .f-btn {
             background: transparent;
             border: 1px solid #1e1e1e;
             color: var(--mist);
@@ -470,244 +361,328 @@
             font-size: 8px;
             letter-spacing: 2px;
             text-transform: uppercase;
-            padding: 6px 14px;
+            padding: 7px 14px;
             cursor: pointer;
             transition: all 0.25s;
+            white-space: nowrap;
         }
-
-        .ctrl-btn:hover {
+        .f-btn:hover, .f-btn.on {
             border-color: var(--gold-dim);
             color: var(--gold);
         }
 
-        .ctrl-btn.active {
-            border-color: var(--gold);
-            color: var(--gold);
-            background: var(--gold-glow);
-        }
-
-        .ar-btn {
-            background: transparent;
-            border: 1px solid var(--gold);
-            color: var(--gold);
+        /* Büyük AR başlat butonu */
+        #big-ar-btn {
+            flex: 1;
+            max-width: 220px;
+            padding: 10px 0;
+            background: var(--gold);
+            border: none;
+            color: var(--ink);
             font-family: 'Montserrat', sans-serif;
-            font-size: 8px;
-            font-weight: 500;
+            font-size: 9px;
+            font-weight: 600;
             letter-spacing: 3px;
             text-transform: uppercase;
-            padding: 8px 20px;
             cursor: pointer;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
+            transition: opacity 0.3s;
         }
-
-        .ar-btn::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: var(--gold);
-            transform: translateX(-101%);
-            transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
-        }
-
-        .ar-btn:hover::before { transform: translateX(0); }
-        .ar-btn:hover { color: var(--ink); }
-        .ar-btn span { position: relative; z-index: 1; }
+        #big-ar-btn:hover { opacity: 0.85; }
+        #big-ar-btn:disabled { opacity: 0.25; cursor: not-allowed; }
 
         .f-copy {
-            font-size: 8px;
-            letter-spacing: 1.5px;
-            color: #252525;
+            font-size: 7px;
+            letter-spacing: 1px;
+            color: #1f1f1f;
+            white-space: nowrap;
         }
+
+        /* ═══════════════════════════════
+           AR AÇIKLAMASI (cihaz uyumsuzsa)
+        ═══════════════════════════════ */
+        #ar-tip {
+            position: fixed;
+            inset: 0;
+            z-index: 8000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(6,7,10,0.95);
+            padding: 30px;
+        }
+        #ar-tip.show { display: flex; }
+
+        .tip-box {
+            border: 1px solid var(--gold-dim);
+            padding: 36px 28px;
+            max-width: 320px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .tip-box h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 22px;
+            color: var(--gold);
+        }
+        .tip-box p {
+            font-size: 11px;
+            color: var(--mist);
+            line-height: 1.8;
+            letter-spacing: 0.5px;
+        }
+        .tip-box ul {
+            list-style: none;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .tip-box ul li {
+            font-size: 11px;
+            color: #888;
+            padding-left: 14px;
+            position: relative;
+        }
+        .tip-box ul li::before {
+            content: '—';
+            position: absolute;
+            left: 0;
+            color: var(--gold-dim);
+        }
+        .tip-close {
+            padding: 10px;
+            background: transparent;
+            border: 1px solid var(--gold-dim);
+            color: var(--gold);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 9px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+        .tip-close:hover { background: var(--gold-glow); }
     </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════
+<!-- ═══════════════════════════════════════
      SPLASH
-═══════════════════════════════════════════ -->
+═══════════════════════════════════════ -->
 <div id="splash">
     <div class="splash-inner">
         <div class="rule"></div>
-
-        <div class="splash-tag">Küçükçekmece Belediyesi · 3D Sergi</div>
+        <div class="splash-tag">Küçükçekmece Belediyesi · AR Sergi</div>
 
         <h1 class="splash-name">
             Atatürk
             <em>Yaşıyor</em>
         </h1>
 
-        <div class="splash-dates">1881 — 1938</div>
+        <div class="splash-dates">1881 &nbsp;—&nbsp; 1938</div>
 
-        <button class="enter-btn" id="enter-btn">
-            <span>Sergiye Gir</span>
-        </button>
+        <div class="splash-btns">
+            <!-- 📱 AR: kamera açılır, model gerçek dünyada durur -->
+            <button class="s-btn primary" id="btn-ar-splash">
+                <span>📱 AR ile Başlat</span>
+            </button>
+            <!-- 3D: kamerasız önizleme -->
+            <button class="s-btn secondary" id="btn-3d-splash">
+                <span>3D Önizle</span>
+            </button>
+        </div>
 
-        <div class="rule bottom" style="margin-top:24px;"></div>
+        <div class="splash-note">
+            AR ile Başlat → Kamera açılır, model gerçek dünyada görünür<br>
+            3D Önizle → Kamerasız dönen 3D model
+        </div>
+
+        <div class="rule flip"></div>
     </div>
-
-    <div class="splash-muni">© Küçükçekmece Belediyesi</div>
+    <div class="splash-muni">© Küçükçekmece Belediyesi 2025</div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     MAIN APP
-═══════════════════════════════════════════ -->
-<div id="app">
+<!-- ═══════════════════════════════════════
+     3D VIEWER EKRANI
+═══════════════════════════════════════ -->
+<div id="viewer-screen">
 
-    <!-- Header -->
-    <header id="header">
-        <div class="h-brand">
-            <div class="h-logo-k"></div>
-            <div>
-                <div class="h-title">Atatürk Sergisi</div>
-                <div class="h-sub">Küçükçekmece Belediyesi</div>
-            </div>
-        </div>
-        <div class="h-right">
-            <div class="h-badge">3D · İnteraktif</div>
-        </div>
+    <header id="vheader">
+        <div class="vh-brand">Atatürk Sergisi</div>
+        <div class="vh-badge">Küçükçekmece</div>
     </header>
 
-    <!-- Viewer -->
-    <div id="viewer-wrap">
+    <div id="mv-wrap">
+        <div class="cdeco tl"></div>
+        <div class="cdeco tr"></div>
+        <div class="cdeco bl"></div>
+        <div class="cdeco br"></div>
 
-        <!-- Corner decorations -->
-        <div class="corner-deco tl"></div>
-        <div class="corner-deco tr"></div>
-        <div class="corner-deco bl"></div>
-        <div class="corner-deco br"></div>
-
-        <!-- Loading -->
-        <div id="model-loading">
-            <div class="ml-name">Yükleniyor…</div>
-            <div class="ml-track"><div class="ml-fill" id="ml-fill"></div></div>
-            <div class="ml-pct" id="ml-pct">%0</div>
+        <!-- Yükleme -->
+        <div id="ml">
+            <div class="ml-text">Yükleniyor…</div>
+            <div class="ml-track"><div class="ml-fill" id="mlfill"></div></div>
+            <div class="ml-pct" id="mlpct">%0</div>
         </div>
 
-        <!-- Info strip -->
-        <div id="info-strip">
-            <div class="info-line">
-                <div class="info-label">Doğum</div>
-                <div class="info-val">1881, Selanik</div>
-            </div>
-            <div class="info-line">
-                <div class="info-label">Vefat</div>
-                <div class="info-val">10 Kasım 1938</div>
-            </div>
-            <div class="info-line">
-                <div class="info-label">Unvan</div>
-                <div class="info-val">Cumhurbaşkanı</div>
-            </div>
-        </div>
+        <div id="hint3d">Sürükle · Döndür · Yakınlaştır</div>
 
-        <!-- Hint -->
-        <div id="hint">Sürükle · Döndür · Yakınlaştır</div>
-
-        <!-- 3D Model -->
+        <!-- MODEL VIEWER -->
         <model-viewer
             id="mv"
             src="ata_renkli_full8.glb"
             camera-controls
             touch-action="pan-y"
             auto-rotate
-            auto-rotate-delay="500"
+            auto-rotate-delay="600"
             rotation-per-second="18deg"
             camera-orbit="0deg 82deg 2.8m"
-            min-camera-orbit="auto auto 0.8m"
+            min-camera-orbit="auto auto 0.6m"
             max-camera-orbit="auto auto 10m"
             shadow-intensity="1.2"
             shadow-softness="0.9"
             exposure="1.05"
             ar
-            ar-modes="webxr scene-viewer quick-look"
-            style="--ar-button-display:none;">
+            ar-modes="webxr scene-viewer quick-look">
         </model-viewer>
-
     </div>
 
-    <!-- Footer -->
-    <footer id="footer">
-        <div class="f-controls">
-            <button class="ctrl-btn active" id="btn-rotate">⟳ Otomatik Döndür</button>
-            <button class="ctrl-btn" id="btn-reset">↺ Sıfırla</button>
-        </div>
+    <footer id="vfooter">
+        <button class="f-btn on" id="fbtn-rot">⟳ Döndür</button>
+        <button class="f-btn" id="fbtn-rst">↺ Sıfırla</button>
 
-        <button class="ar-btn" id="ar-btn">
-            <span>📱 AR ile Gör</span>
-        </button>
+        <!-- Bu buton model-viewer'ın AR'ını tetikler → kamera açılır -->
+        <button id="big-ar-btn">📱 KAMERAYI AÇ · AR</button>
 
-        <div class="f-copy">Küçükçekmece © 2025</div>
+        <div class="f-copy">© 2025</div>
     </footer>
 
 </div>
 
-<script>
-    const splash   = document.getElementById('splash');
-    const app      = document.getElementById('app');
-    const enterBtn = document.getElementById('enter-btn');
-    const mv       = document.getElementById('mv');
-    const mlFill   = document.getElementById('ml-fill');
-    const mlPct    = document.getElementById('ml-pct');
-    const mlWrap   = document.getElementById('model-loading');
-    const btnRotate= document.getElementById('btn-rotate');
-    const btnReset = document.getElementById('btn-reset');
-    const arBtn    = document.getElementById('ar-btn');
+<!-- ═══════════════════════════════════════
+     AR UYUMSUZLUK AÇIKLAMASI
+═══════════════════════════════════════ -->
+<div id="ar-tip">
+    <div class="tip-box">
+        <h3>AR Desteklenmiyor</h3>
+        <p>Bu cihaz veya tarayıcı WebXR AR'ı desteklemiyor. Lütfen şunları deneyin:</p>
+        <ul>
+            <li>Android → Chrome tarayıcı</li>
+            <li>iOS (iPhone/iPad) → Safari tarayıcı</li>
+            <li>Sayfanın HTTPS üzerinden açıldığından emin olun</li>
+            <li>ARCore (Android) veya ARKit (iOS) kurulu olmalı</li>
+        </ul>
+        <button class="tip-close" id="tip-close">Tamam, 3D İzle</button>
+    </div>
+</div>
 
-    // ── Splash → App ──
-    enterBtn.addEventListener('click', () => {
+<script>
+    const splash      = document.getElementById('splash');
+    const viewerScr   = document.getElementById('viewer-screen');
+    const mv          = document.getElementById('mv');
+    const mlfill      = document.getElementById('mlfill');
+    const mlpct       = document.getElementById('mlpct');
+    const mlWrap      = document.getElementById('ml');
+    const fbtnRot     = document.getElementById('fbtn-rot');
+    const fbtnRst     = document.getElementById('fbtn-rst');
+    const bigArBtn    = document.getElementById('big-ar-btn');
+    const arTip       = document.getElementById('ar-tip');
+    const tipClose    = document.getElementById('tip-close');
+    const btnArSplash = document.getElementById('btn-ar-splash');
+    const btn3dSplash = document.getElementById('btn-3d-splash');
+
+    function hideSplash() {
         splash.classList.add('out');
-        setTimeout(() => {
-            splash.style.display = 'none';
-            app.classList.add('visible');
-        }, 1000);
+        setTimeout(() => splash.style.display = 'none', 1000);
+    }
+
+    function showViewer() {
+        viewerScr.classList.add('visible');
+    }
+
+    function tryActivateAR() {
+        // model-viewer yüklendikten sonra AR'ı dene
+        const activate = () => {
+            if (mv.canActivateAR) {
+                mv.activateAR();
+            } else {
+                // Desteklemiyorsa açıklama göster
+                arTip.classList.add('show');
+            }
+        };
+
+        if (mv.loaded) {
+            activate();
+        } else {
+            mv.addEventListener('load', activate, { once: true });
+        }
+    }
+
+    // ── Splash: AR butonu ──
+    btnArSplash.addEventListener('click', () => {
+        hideSplash();
+        showViewer();
+        // Model yüklenince otomatik AR başlat
+        setTimeout(tryActivateAR, 1200);
+    });
+
+    // ── Splash: 3D önizleme butonu ──
+    btn3dSplash.addEventListener('click', () => {
+        hideSplash();
+        showViewer();
+    });
+
+    // ── Footer: Kamerayı Aç (AR) butonu ──
+    bigArBtn.addEventListener('click', () => {
+        tryActivateAR();
+    });
+
+    // ── AR ipucu kapat ──
+    tipClose.addEventListener('click', () => {
+        arTip.classList.remove('show');
     });
 
     // ── Yükleme ilerlemesi ──
     mv.addEventListener('progress', (e) => {
         const pct = Math.round(e.detail.totalProgress * 100);
-        mlFill.style.width = pct + '%';
-        mlPct.textContent  = '%' + pct;
+        mlfill.style.width = pct + '%';
+        mlpct.textContent  = '%' + pct;
     });
 
     mv.addEventListener('load', () => {
         mlWrap.classList.add('done');
         setTimeout(() => mlWrap.style.display = 'none', 900);
+
+        // AR desteklenmiyorsa footer butonunu soluklaştır
+        if (!mv.canActivateAR) {
+            bigArBtn.title = 'Bu cihaz AR desteklemiyor';
+        }
     });
 
-    // ── Otomatik döndür toggle ──
+    // ── Döndür toggle ──
     let rotating = true;
-    btnRotate.addEventListener('click', () => {
+    fbtnRot.addEventListener('click', () => {
         rotating = !rotating;
         mv.autoRotate = rotating;
-        btnRotate.textContent = rotating ? '⟳ Otomatik Döndür' : '⏸ Durduruldu';
-        btnRotate.classList.toggle('active', rotating);
+        fbtnRot.textContent = rotating ? '⟳ Döndür' : '⏸ Durdur';
+        fbtnRot.classList.toggle('on', rotating);
     });
 
     // ── Kamera sıfırla ──
-    btnReset.addEventListener('click', () => {
+    fbtnRst.addEventListener('click', () => {
         mv.cameraOrbit  = '0deg 82deg 2.8m';
         mv.cameraTarget = 'auto auto auto';
         mv.autoRotate   = true;
         rotating = true;
-        btnRotate.textContent = '⟳ Otomatik Döndür';
-        btnRotate.classList.add('active');
+        fbtnRot.textContent = '⟳ Döndür';
+        fbtnRot.classList.add('on');
     });
 
-    // ── AR ──
-    arBtn.addEventListener('click', () => {
-        if (mv.canActivateAR) {
-            mv.activateAR();
-        } else {
-            alert('Bu cihaz AR\'ı desteklemiyor veya HTTPS bağlantısı gerekiyor.');
-        }
-    });
-
-    // AR desteklenmiyorsa butonu soluklaştır
+    // ── AR oturumu bitince bilgi ver ──
     mv.addEventListener('ar-status', (e) => {
-        if (!mv.canActivateAR) {
-            arBtn.style.opacity = '0.3';
-            arBtn.style.cursor  = 'not-allowed';
+        if (e.detail.status === 'failed') {
+            arTip.classList.add('show');
         }
     });
 </script>
