@@ -3,450 +3,711 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>AR Atatürk Sergisi — Küçükçekmece</title>
-
-    <!-- MindAR + A-Frame -->
-    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+    <title>Atatürk 3D Sergisi — Küçükçekmece Belediyesi</title>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Raleway:wght@300;400;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Montserrat:wght@200;400;500&display=swap');
+
+        :root {
+            --gold:     #b8973a;
+            --gold-dim: #b8973a44;
+            --gold-glow:#b8973a18;
+            --ink:      #06070a;
+            --paper:    #f2ede4;
+            --mist:     #9fa3aa;
+            --red:      #c0392b;
+        }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body {
-            background: #0a0a0a;
-            color: #f0ece3;
-            font-family: 'Raleway', sans-serif;
+        html, body {
+            width: 100%; height: 100%;
             overflow: hidden;
+            background: var(--ink);
+            color: var(--paper);
+            font-family: 'Montserrat', sans-serif;
         }
 
-        /* ══════════════════════════════
-           SPLASH EKRANI
-        ══════════════════════════════ */
+        /* ═══════════════════════════════════════
+           SPLASH / INTRO
+        ═══════════════════════════════════════ */
         #splash {
             position: fixed;
             inset: 0;
-            background: #0a0a0a;
+            z-index: 9000;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 24px;
-            z-index: 9999;
-            transition: opacity 0.8s ease;
+            background: var(--ink);
+            transition: opacity 1s ease, visibility 1s ease;
         }
 
-        #splash.hidden {
+        #splash.out {
             opacity: 0;
+            visibility: hidden;
+        }
+
+        /* Animated noise grain overlay */
+        #splash::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.06'/%3E%3C/svg%3E");
+            opacity: 0.4;
             pointer-events: none;
         }
 
-        .splash-line {
+        /* Vignette */
+        #splash::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 30%, rgba(6,7,10,0.85) 100%);
+            pointer-events: none;
+        }
+
+        .splash-inner {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        /* Thin top rule */
+        .rule {
             width: 1px;
-            height: 60px;
-            background: linear-gradient(to bottom, transparent, #c9a96e);
-            animation: lineGrow 1.2s ease forwards;
-        }
-        .splash-line.flip {
-            background: linear-gradient(to top, transparent, #c9a96e);
+            height: 0;
+            background: linear-gradient(to bottom, transparent, var(--gold));
+            animation: ruleDown 1.4s cubic-bezier(0.16,1,0.3,1) 0.2s forwards;
         }
 
-        @keyframes lineGrow {
-            from { height: 0; opacity: 0; }
-            to   { height: 60px; opacity: 1; }
+        .rule.bottom {
+            background: linear-gradient(to top, transparent, var(--gold));
+            animation: ruleDown 1.4s cubic-bezier(0.16,1,0.3,1) 0.4s forwards;
         }
 
-        .splash-badge {
-            border: 1px solid #c9a96e44;
-            padding: 6px 18px;
-            letter-spacing: 4px;
-            font-size: 10px;
-            color: #c9a96e;
+        @keyframes ruleDown {
+            to { height: 72px; }
+        }
+
+        .splash-tag {
+            margin: 20px 0 14px;
+            font-size: 8.5px;
+            letter-spacing: 5px;
+            color: var(--gold);
             text-transform: uppercase;
-            animation: fadeUp 1s ease 0.3s both;
+            opacity: 0;
+            animation: fadeSlide 0.9s ease 0.8s forwards;
         }
 
-        .splash-title {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(30px, 9vw, 52px);
-            font-weight: 700;
-            letter-spacing: 2px;
+        .splash-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 600;
+            font-size: clamp(48px, 12vw, 88px);
+            letter-spacing: -1px;
+            line-height: 0.92;
             text-align: center;
-            line-height: 1.2;
-            animation: fadeUp 1s ease 0.5s both;
+            color: var(--paper);
+            opacity: 0;
+            animation: fadeSlide 1s ease 1s forwards;
         }
 
-        .splash-title span { color: #c9a96e; font-style: italic; }
-
-        .splash-sub {
-            font-size: 12px;
-            color: #666;
-            letter-spacing: 1px;
-            text-align: center;
-            line-height: 1.8;
-            animation: fadeUp 1s ease 0.7s both;
+        .splash-name em {
+            display: block;
+            font-style: italic;
+            font-weight: 300;
+            color: var(--gold);
+            font-size: 0.62em;
+            letter-spacing: 6px;
+            margin-top: 6px;
         }
 
-        #start-btn {
-            margin-top: 8px;
-            padding: 16px 48px;
+        .splash-dates {
+            margin: 18px 0 32px;
+            font-size: 10px;
+            letter-spacing: 4px;
+            color: var(--mist);
+            opacity: 0;
+            animation: fadeSlide 0.9s ease 1.2s forwards;
+        }
+
+        .enter-btn {
+            position: relative;
+            padding: 15px 52px;
             background: transparent;
-            border: 1px solid #c9a96e;
-            color: #c9a96e;
-            font-family: 'Raleway', sans-serif;
-            font-size: 12px;
-            letter-spacing: 3px;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 9px;
+            font-weight: 500;
+            letter-spacing: 4px;
             text-transform: uppercase;
             cursor: pointer;
-            transition: all 0.3s ease;
-            animation: fadeUp 1s ease 0.9s both;
+            overflow: hidden;
+            transition: color 0.4s ease;
+            opacity: 0;
+            animation: fadeSlide 0.9s ease 1.5s forwards;
         }
 
-        #start-btn:hover, #start-btn:active {
-            background: #c9a96e;
-            color: #0a0a0a;
+        .enter-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gold);
+            transform: translateX(-101%);
+            transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
         }
 
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
+        .enter-btn:hover::before { transform: translateX(0); }
+        .enter-btn:hover { color: var(--ink); }
+
+        .enter-btn span { position: relative; z-index: 1; }
+
+        .splash-muni {
+            position: absolute;
+            bottom: 24px;
+            font-size: 8px;
+            letter-spacing: 3px;
+            color: #333;
+            text-transform: uppercase;
+            opacity: 0;
+            animation: fadeSlide 0.8s ease 1.8s forwards;
+        }
+
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(12px); }
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* ══════════════════════════════
-           AR OVERLAY
-        ══════════════════════════════ */
-        #ar-overlay {
+        /* ═══════════════════════════════════════
+           MAIN LAYOUT
+        ═══════════════════════════════════════ */
+        #app {
             position: fixed;
             inset: 0;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            opacity: 0;
+            transition: opacity 0.8s ease;
             pointer-events: none;
-            z-index: 100;
-            display: none;
         }
 
-        #ar-overlay.active { display: block; }
-
-        .corner {
-            position: absolute;
-            width: 28px; height: 28px;
-            border-color: #c9a96e;
-            border-style: solid;
-            opacity: 0.7;
+        #app.visible {
+            opacity: 1;
+            pointer-events: all;
         }
-        .corner.tl { top: 20px; left: 20px;   border-width: 2px 0 0 2px; }
-        .corner.tr { top: 20px; right: 20px;   border-width: 2px 2px 0 0; }
-        .corner.bl { bottom: 20px; left: 20px; border-width: 0 0 2px 2px; }
-        .corner.br { bottom: 20px; right: 20px;border-width: 0 2px 2px 0; }
 
-        #top-bar {
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            padding: 14px 20px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.65), transparent);
+        /* ── Header ── */
+        #header {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            padding: 0 24px;
+            height: 56px;
+            background: rgba(6,7,10,0.92);
+            border-bottom: 1px solid var(--gold-dim);
+            backdrop-filter: blur(12px);
+            z-index: 10;
         }
 
-        .brand {
-            font-family: 'Playfair Display', serif;
-            font-size: 14px;
-            color: #c9a96e;
-            letter-spacing: 2px;
-        }
-
-        .rec-dot {
+        .h-brand {
             display: flex;
             align-items: center;
-            gap: 7px;
-            font-size: 10px;
-            color: #888;
+            gap: 12px;
+        }
+
+        .h-logo-k {
+            width: 28px; height: 28px;
+            position: relative;
+        }
+
+        /* Geometric K made from CSS */
+        .h-logo-k::before,
+        .h-logo-k::after {
+            content: '';
+            position: absolute;
+            background: var(--gold);
+        }
+        /* Vertical bar */
+        .h-logo-k::before {
+            left: 5px; top: 4px;
+            width: 3px; height: 20px;
+        }
+        /* Diagonal bars via clip-path */
+        .h-logo-k::after {
+            left: 8px; top: 4px;
+            width: 16px; height: 20px;
+            background: transparent;
+            border-top: 3px solid var(--gold);
+            border-bottom: 3px solid var(--gold);
+            clip-path: polygon(0 0, 100% 0, 50% 50%, 100% 100%, 0 100%, 50% 50%);
+        }
+
+        .h-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--paper);
+        }
+
+        .h-sub {
+            font-size: 8px;
+            letter-spacing: 2px;
+            color: var(--mist);
+            text-transform: uppercase;
+        }
+
+        .h-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .h-badge {
+            font-size: 8px;
+            letter-spacing: 2px;
+            color: var(--gold);
+            text-transform: uppercase;
+            border: 1px solid var(--gold-dim);
+            padding: 4px 10px;
+        }
+
+        /* ── model-viewer area ── */
+        #viewer-wrap {
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(ellipse at 50% 60%, #12100a 0%, #06070a 70%);
+        }
+
+        /* Radial glow behind model */
+        #viewer-wrap::before {
+            content: '';
+            position: absolute;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 40%;
+            background: radial-gradient(ellipse, var(--gold-glow) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Horizontal scan line — decorative */
+        #viewer-wrap::after {
+            content: '';
+            position: absolute;
+            left: 0; right: 0;
+            top: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--gold-dim), transparent);
+            animation: scanLine 6s linear infinite;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        @keyframes scanLine {
+            0%   { top: 0;    opacity: 0.6; }
+            90%  { top: 100%; opacity: 0.3; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        model-viewer {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            --progress-bar-color: var(--gold);
+            --progress-mask: var(--ink);
+        }
+
+        /* Hide default AR button */
+        model-viewer::part(default-ar-button) { display: none !important; }
+
+        /* ── Loading state ── */
+        #model-loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            z-index: 5;
+            pointer-events: none;
+            transition: opacity 0.8s ease;
+        }
+
+        #model-loading.done { opacity: 0; }
+
+        .ml-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            font-weight: 300;
+            font-style: italic;
+            color: var(--gold);
+            letter-spacing: 4px;
+        }
+
+        .ml-track {
+            width: 120px;
+            height: 1px;
+            background: #1a1a1a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ml-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--gold);
+            transition: width 0.25s ease;
+        }
+
+        .ml-pct {
+            font-size: 9px;
+            letter-spacing: 3px;
+            color: #333;
+        }
+
+        /* ── Corner decorations ── */
+        .corner-deco {
+            position: absolute;
+            width: 22px; height: 22px;
+            border-color: var(--gold-dim);
+            border-style: solid;
+            z-index: 3;
+            pointer-events: none;
+        }
+        .corner-deco.tl { top: 16px; left: 16px;   border-width: 1px 0 0 1px; }
+        .corner-deco.tr { top: 16px; right: 16px;   border-width: 1px 1px 0 0; }
+        .corner-deco.bl { bottom: 16px; left: 16px; border-width: 0 0 1px 1px; }
+        .corner-deco.br { bottom: 16px; right: 16px;border-width: 0 1px 1px 0; }
+
+        /* ── Info overlay (right side) ── */
+        #info-strip {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 4;
+            pointer-events: none;
+        }
+
+        .info-line {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 3px;
+        }
+
+        .info-label {
+            font-size: 7px;
+            letter-spacing: 3px;
+            color: var(--gold);
+            text-transform: uppercase;
+        }
+
+        .info-val {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14px;
+            color: var(--paper);
             letter-spacing: 1px;
         }
 
-        .dot {
-            width: 8px; height: 8px;
-            background: #e63946;
-            border-radius: 50%;
-            animation: pulse 1.4s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50%       { opacity: 0.3; transform: scale(0.65); }
-        }
-
-        #hint-bar {
+        /* ── Hint bottom center ── */
+        #hint {
             position: absolute;
-            bottom: 0; left: 0; right: 0;
-            padding: 22px 20px;
-            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-            text-align: center;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            letter-spacing: 2.5px;
+            color: #2a2a2a;
+            text-transform: uppercase;
+            white-space: nowrap;
+            z-index: 4;
+            pointer-events: none;
+            animation: hintBreath 3s ease-in-out infinite;
         }
 
-        #hint-text {
-            font-size: 11px;
-            color: #bbb;
+        @keyframes hintBreath {
+            0%, 100% { opacity: 0.4; }
+            50%       { opacity: 0.9; }
+        }
+
+        /* ── Footer ── */
+        #footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            height: 52px;
+            background: rgba(6,7,10,0.92);
+            border-top: 1px solid var(--gold-dim);
+            backdrop-filter: blur(12px);
+            z-index: 10;
+        }
+
+        .f-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ctrl-btn {
+            background: transparent;
+            border: 1px solid #1e1e1e;
+            color: var(--mist);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 8px;
             letter-spacing: 2px;
             text-transform: uppercase;
-            transition: color 0.5s ease;
+            padding: 6px 14px;
+            cursor: pointer;
+            transition: all 0.25s;
         }
 
-        #hint-text.found { color: #c9a96e; }
-
-        #scan-ring {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 170px; height: 170px;
-            border: 1px solid #c9a96e66;
-            border-radius: 50%;
-            animation: scanPulse 2.2s ease-in-out infinite;
-            pointer-events: none;
-            transition: opacity 0.5s ease;
+        .ctrl-btn:hover {
+            border-color: var(--gold-dim);
+            color: var(--gold);
         }
 
-        #scan-ring::after {
+        .ctrl-btn.active {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: var(--gold-glow);
+        }
+
+        .ar-btn {
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 8px;
+            font-weight: 500;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ar-btn::before {
             content: '';
             position: absolute;
-            inset: 10px;
-            border: 1px solid #c9a96e22;
-            border-radius: 50%;
+            inset: 0;
+            background: var(--gold);
+            transform: translateX(-101%);
+            transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
         }
 
-        @keyframes scanPulse {
-            0%, 100% { transform: translate(-50%,-50%) scale(1);    opacity: 0.7; }
-            50%       { transform: translate(-50%,-50%) scale(1.18); opacity: 0.2; }
-        }
+        .ar-btn:hover::before { transform: translateX(0); }
+        .ar-btn:hover { color: var(--ink); }
+        .ar-btn span { position: relative; z-index: 1; }
 
-        #about-btn {
-            position: fixed;
-            bottom: 26px; right: 20px;
-            pointer-events: all;
-            z-index: 200;
-            background: rgba(10,10,10,0.75);
-            border: 1px solid #c9a96e44;
-            color: #c9a96e;
-            font-size: 10px;
-            letter-spacing: 2px;
-            padding: 9px 18px;
-            cursor: pointer;
-            display: none;
-            font-family: 'Raleway', sans-serif;
-            text-transform: uppercase;
-            transition: all 0.3s;
-        }
-
-        #about-btn.active { display: block; }
-        #about-btn:hover  { border-color: #c9a96e; }
-
-        #info-panel {
-            position: fixed;
-            bottom: 70px; right: 18px;
-            width: min(290px, 82vw);
-            background: rgba(8,8,8,0.93);
-            border: 1px solid #c9a96e22;
-            padding: 22px;
-            z-index: 300;
-            display: none;
-            backdrop-filter: blur(14px);
-        }
-
-        #info-panel.open { display: block; }
-
-        #info-panel h3 {
-            font-family: 'Playfair Display', serif;
-            color: #c9a96e;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-
-        #info-panel p {
-            font-size: 12px;
-            color: #999;
-            line-height: 1.75;
-        }
-
-        #info-panel em { color: #c9a96e88; }
-
-        a-scene {
-            position: fixed !important;
-            inset: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
+        .f-copy {
+            font-size: 8px;
+            letter-spacing: 1.5px;
+            color: #252525;
         }
     </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     SPLASH EKRANI
-══════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════════
+     SPLASH
+═══════════════════════════════════════════ -->
 <div id="splash">
-    <div class="splash-line"></div>
-    <div class="splash-badge">Artırılmış Gerçeklik · Küçükçekmece</div>
-    <h1 class="splash-title">Atatürk<br><span>Yaşıyor</span></h1>
-    <p class="splash-sub">
-        K logosunu kameraya gösterin<br>
-        3D model hayat bulacak
-    </p>
-    <button id="start-btn">Sergiye Başla</button>
-    <div class="splash-line flip"></div>
+    <div class="splash-inner">
+        <div class="rule"></div>
+
+        <div class="splash-tag">Küçükçekmece Belediyesi · 3D Sergi</div>
+
+        <h1 class="splash-name">
+            Atatürk
+            <em>Yaşıyor</em>
+        </h1>
+
+        <div class="splash-dates">1881 — 1938</div>
+
+        <button class="enter-btn" id="enter-btn">
+            <span>Sergiye Gir</span>
+        </button>
+
+        <div class="rule bottom" style="margin-top:24px;"></div>
+    </div>
+
+    <div class="splash-muni">© Küçükçekmece Belediyesi</div>
 </div>
 
-<!-- ══════════════════════════════════════
-     MINdAR IMAGE TRACKING AR SAHNESİ
-══════════════════════════════════════ -->
-<a-scene
-    id="ar-scene"
-    mindar-image="imageTargetSrc: targets.mind; autoStart: false; uiLoading: no; uiError: no; uiScanning: no;"
-    color-space="sRGB"
-    renderer="colorManagement: true; physicallyCorrectLights: true;"
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false"
-    style="display:none;">
+<!-- ═══════════════════════════════════════════
+     MAIN APP
+═══════════════════════════════════════════ -->
+<div id="app">
 
-    <a-assets>
-        <a-asset-item id="ata-glb" src="ata_renkli_full8.glb"></a-asset-item>
-    </a-assets>
-
-    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-    <!--
-        targetIndex: 0  → targets.mind içindeki ilk görsel (K logosu)
-        scale / position / rotation → modele göre ayarlayın
-    -->
-    <a-entity mindar-image-target="targetIndex: 0">
-
-        <!-- 3D ATATÜRK MODELİ -->
-        <a-gltf-model
-            id="ata-model"
-            src="#ata-glb"
-            position="0 0 0.1"
-            scale="0.15 0.15 0.15"
-            rotation="0 0 0"
-            animation="property: rotation; from: 0 0 0; to: 0 360 0; loop: true; dur: 14000; easing: linear;">
-        </a-gltf-model>
-
-        <!-- Altın zemin halkası -->
-        <a-ring
-            color="#c9a96e"
-            radius-inner="0.12"
-            radius-outer="0.14"
-            position="0 0 0"
-            rotation="0 0 0"
-            material="opacity: 0.55; transparent: true; side: double;">
-        </a-ring>
-
-        <!-- Işıklar -->
-        <a-light type="point"   color="#f5e6c8" intensity="1.5" position="0 0.5 0.3"></a-light>
-        <a-light type="ambient" color="#ffffff"  intensity="0.5"></a-light>
-
-    </a-entity>
-
-</a-scene>
-
-<!-- ══════════════════════════════════════
-     AR OVERLAY UI
-══════════════════════════════════════ -->
-<div id="ar-overlay">
-    <div class="corner tl"></div>
-    <div class="corner tr"></div>
-    <div class="corner bl"></div>
-    <div class="corner br"></div>
-
-    <div id="top-bar">
-        <div class="brand">ATATÜRK SERGİSİ</div>
-        <div class="rec-dot">
-            <div class="dot"></div>
-            <span>CANLI</span>
+    <!-- Header -->
+    <header id="header">
+        <div class="h-brand">
+            <div class="h-logo-k"></div>
+            <div>
+                <div class="h-title">Atatürk Sergisi</div>
+                <div class="h-sub">Küçükçekmece Belediyesi</div>
+            </div>
         </div>
+        <div class="h-right">
+            <div class="h-badge">3D · İnteraktif</div>
+        </div>
+    </header>
+
+    <!-- Viewer -->
+    <div id="viewer-wrap">
+
+        <!-- Corner decorations -->
+        <div class="corner-deco tl"></div>
+        <div class="corner-deco tr"></div>
+        <div class="corner-deco bl"></div>
+        <div class="corner-deco br"></div>
+
+        <!-- Loading -->
+        <div id="model-loading">
+            <div class="ml-name">Yükleniyor…</div>
+            <div class="ml-track"><div class="ml-fill" id="ml-fill"></div></div>
+            <div class="ml-pct" id="ml-pct">%0</div>
+        </div>
+
+        <!-- Info strip -->
+        <div id="info-strip">
+            <div class="info-line">
+                <div class="info-label">Doğum</div>
+                <div class="info-val">1881, Selanik</div>
+            </div>
+            <div class="info-line">
+                <div class="info-label">Vefat</div>
+                <div class="info-val">10 Kasım 1938</div>
+            </div>
+            <div class="info-line">
+                <div class="info-label">Unvan</div>
+                <div class="info-val">Cumhurbaşkanı</div>
+            </div>
+        </div>
+
+        <!-- Hint -->
+        <div id="hint">Sürükle · Döndür · Yakınlaştır</div>
+
+        <!-- 3D Model -->
+        <model-viewer
+            id="mv"
+            src="ata_renkli_full8.glb"
+            camera-controls
+            touch-action="pan-y"
+            auto-rotate
+            auto-rotate-delay="500"
+            rotation-per-second="18deg"
+            camera-orbit="0deg 82deg 2.8m"
+            min-camera-orbit="auto auto 0.8m"
+            max-camera-orbit="auto auto 10m"
+            shadow-intensity="1.2"
+            shadow-softness="0.9"
+            exposure="1.05"
+            ar
+            ar-modes="webxr scene-viewer quick-look"
+            style="--ar-button-display:none;">
+        </model-viewer>
+
     </div>
 
-    <div id="scan-ring"></div>
+    <!-- Footer -->
+    <footer id="footer">
+        <div class="f-controls">
+            <button class="ctrl-btn active" id="btn-rotate">⟳ Otomatik Döndür</button>
+            <button class="ctrl-btn" id="btn-reset">↺ Sıfırla</button>
+        </div>
 
-    <div id="hint-bar">
-        <div id="hint-text">K logosunu kameraya gösterin</div>
-    </div>
+        <button class="ar-btn" id="ar-btn">
+            <span>📱 AR ile Gör</span>
+        </button>
+
+        <div class="f-copy">Küçükçekmece © 2025</div>
+    </footer>
+
 </div>
 
-<button id="about-btn">Hakkında</button>
-
-<div id="info-panel">
-    <h3>Mustafa Kemal Atatürk</h3>
-    <p>
-        Türkiye Cumhuriyeti'nin kurucusu (1881–1938).<br><br>
-        Bu AR sergisi, Atatürk'ün 3 boyutlu modelini
-        Küçükçekmece K logosu üzerine yansıtmaktadır.<br><br>
-        <em>Ekran görüntüsü alarak paylaşabilirsiniz.</em>
-    </p>
-</div>
-
-<!-- ══════════════════════════════════════
-     JAVASCRIPT
-══════════════════════════════════════ -->
 <script>
-    const splash    = document.getElementById('splash');
-    const arScene   = document.getElementById('ar-scene');
-    const overlay   = document.getElementById('ar-overlay');
-    const startBtn  = document.getElementById('start-btn');
-    const hintText  = document.getElementById('hint-text');
-    const scanRing  = document.getElementById('scan-ring');
-    const aboutBtn  = document.getElementById('about-btn');
-    const infoPanel = document.getElementById('info-panel');
-    const target    = document.querySelector('[mindar-image-target]');
+    const splash   = document.getElementById('splash');
+    const app      = document.getElementById('app');
+    const enterBtn = document.getElementById('enter-btn');
+    const mv       = document.getElementById('mv');
+    const mlFill   = document.getElementById('ml-fill');
+    const mlPct    = document.getElementById('ml-pct');
+    const mlWrap   = document.getElementById('model-loading');
+    const btnRotate= document.getElementById('btn-rotate');
+    const btnReset = document.getElementById('btn-reset');
+    const arBtn    = document.getElementById('ar-btn');
 
-    // ── Başlat butonuna tıklanınca ──
-    startBtn.addEventListener('click', () => {
-        splash.classList.add('hidden');
-
+    // ── Splash → App ──
+    enterBtn.addEventListener('click', () => {
+        splash.classList.add('out');
         setTimeout(() => {
             splash.style.display = 'none';
-            arScene.style.display = 'block';
-            overlay.classList.add('active');
-            aboutBtn.classList.add('active');
-
-            // MindAR sistemi başlat
-            const tryStart = () => {
-                const sys = arScene.systems['mindar-image-system'];
-                if (sys) {
-                    sys.start();
-                } else {
-                    // Sahne henüz yüklenmediyse bekle
-                    arScene.addEventListener('loaded', () => {
-                        const s = arScene.systems['mindar-image-system'];
-                        if (s) s.start();
-                    }, { once: true });
-                }
-            };
-
-            tryStart();
-        }, 800);
+            app.classList.add('visible');
+        }, 1000);
     });
 
-    // ── K logosu ekrana girince ──
-    target.addEventListener('targetFound', () => {
-        hintText.textContent = '✦ Atatürk algılandı';
-        hintText.classList.add('found');
-        scanRing.style.opacity = '0';
+    // ── Yükleme ilerlemesi ──
+    mv.addEventListener('progress', (e) => {
+        const pct = Math.round(e.detail.totalProgress * 100);
+        mlFill.style.width = pct + '%';
+        mlPct.textContent  = '%' + pct;
     });
 
-    // ── K logosu ekrandan çıkınca ──
-    target.addEventListener('targetLost', () => {
-        hintText.textContent = 'K logosunu kameraya gösterin';
-        hintText.classList.remove('found');
-        scanRing.style.opacity = '1';
+    mv.addEventListener('load', () => {
+        mlWrap.classList.add('done');
+        setTimeout(() => mlWrap.style.display = 'none', 900);
     });
 
-    // ── Hakkında paneli ──
-    aboutBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        infoPanel.classList.toggle('open');
+    // ── Otomatik döndür toggle ──
+    let rotating = true;
+    btnRotate.addEventListener('click', () => {
+        rotating = !rotating;
+        mv.autoRotate = rotating;
+        btnRotate.textContent = rotating ? '⟳ Otomatik Döndür' : '⏸ Durduruldu';
+        btnRotate.classList.toggle('active', rotating);
     });
 
-    document.addEventListener('click', (e) => {
-        if (!infoPanel.contains(e.target) && e.target !== aboutBtn) {
-            infoPanel.classList.remove('open');
+    // ── Kamera sıfırla ──
+    btnReset.addEventListener('click', () => {
+        mv.cameraOrbit  = '0deg 82deg 2.8m';
+        mv.cameraTarget = 'auto auto auto';
+        mv.autoRotate   = true;
+        rotating = true;
+        btnRotate.textContent = '⟳ Otomatik Döndür';
+        btnRotate.classList.add('active');
+    });
+
+    // ── AR ──
+    arBtn.addEventListener('click', () => {
+        if (mv.canActivateAR) {
+            mv.activateAR();
+        } else {
+            alert('Bu cihaz AR\'ı desteklemiyor veya HTTPS bağlantısı gerekiyor.');
+        }
+    });
+
+    // AR desteklenmiyorsa butonu soluklaştır
+    mv.addEventListener('ar-status', (e) => {
+        if (!mv.canActivateAR) {
+            arBtn.style.opacity = '0.3';
+            arBtn.style.cursor  = 'not-allowed';
         }
     });
 </script>
